@@ -3,6 +3,7 @@ import string
 import requests as requests
 from bs4 import BeautifulSoup
 import numpy as np
+import re
 
 def get_and_clean_data():
     data = pd.read_csv('data/software_developer_united_states_1971_20191023_1.csv')
@@ -44,7 +45,7 @@ def database_after_java() :
         percent = to_percent(with_java[i], counted_db[i])
         print(' '.join(db) + ' + java: ' + str(with_java[i]) + ' of ' + str(counted_db[i]) + ' (' + percent + '%)')
 
-def all_lang() :
+def along_side_with_java() :
     lang = [['java'], ['python'], ['c'], ['kotlin'], ['swift'], ['rust'], ['ruby'], ['scala'], ['julia'], ['lua']]
     parsed_description = parse_job_description()
     parsed_db = parse_db()
@@ -55,13 +56,72 @@ def all_lang() :
 
     output = query_map[query_map['java'] > 0].apply(lambda s: np.where(s == 1)[0], axis=1).apply(lambda s: list(query_map.columns[s]))
     print(output)
-# todo
 
-# What DB should I learn after java? done :
-# I wound say I will learn db2 after finish java because of the demand in the market
 
-# Which DB is in demand alongside oracle?
-#   - put database that appear to the table and sum up
+def along_side_with_python():
+    lang = [['python'],['java'], ['c'], ['kotlin'], ['swift'], ['rust'], ['ruby'], ['scala'], ['julia'], ['lua'],['.net'],['c#'],['dart'],['flutter']]
+    parsed_description = parse_job_description()
+    query_map = pd.DataFrame(
+        parsed_description.apply(
+            lambda s: [
+                1 if np.all([d in s for d in db])
+                else 0 for db in lang]
+            ).values.tolist(),
+        columns=[' '.join(d) for d in lang]
+    )
 
-# What programing language is in demand alongside python?
-#   - put the programming language that appear to the table and sum it up
+    output = query_map[query_map['python'] > 0].apply(
+        lambda s: np.where(s == 1)[0], axis=1).apply(
+        lambda s: list(query_map.columns[s])
+    )
+
+    output_no_duplicates = query_map[query_map['python'] > 0].apply(
+        lambda s: np.where(s == 1)[0], axis=1).apply(
+        lambda s: list(query_map.columns[s])
+    ).drop_duplicates()
+
+    summary_map = pd.DataFrame(output.apply(
+        lambda s: [1 if np.all([d in s for d in db]) else 0 for db in output_no_duplicates]).values.tolist(),
+        columns=[' '.join(d) for d in output_no_duplicates]
+    )
+
+    for item in output_no_duplicates:
+        col = ''
+        for i in item:
+            col += i + ' '
+        col = re.sub(r"\s+$", "", col)
+        print(col, ":", summary_map[col].values.sum(), 'of', output.size)
+
+def alongside_with_oracle():
+    parsed_description = parse_job_description()
+    parsed_db = parse_db()
+    query_map = pd.DataFrame(
+        parsed_description.apply(
+            lambda s: [
+                1 if np.all([d in s for d in db])
+                else 0 for db in parsed_db]
+            ).values.tolist(),
+        columns=[' '.join(d) for d in parsed_db]
+    )
+
+    output = query_map[query_map['oracle'] > 0].apply(
+        lambda s: np.where(s == 1)[0], axis=1).apply(
+        lambda s: list(query_map.columns[s])
+    )
+
+    output_no_duplicates = query_map[query_map['oracle'] > 0].apply(
+        lambda s: np.where(s == 1)[0], axis=1).apply(
+        lambda s: list(query_map.columns[s])
+    ).drop_duplicates()
+
+    summary_map = pd.DataFrame(output.apply(
+        lambda s: [1 if np.all([d in s for d in db]) else 0 for db in output_no_duplicates]).values.tolist(),
+        columns=[' '.join(d) for d in output_no_duplicates]
+    )
+
+    for item in output_no_duplicates:
+        col = ''
+        for i in item:
+            col += i + ' '
+        col = re.sub(r"\s+$", "", col)
+        print(col, ":", summary_map[col].values.sum(), 'of', output.size)
