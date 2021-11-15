@@ -44,14 +44,24 @@ def database_after_java() :
         percent = to_percent(with_java[i], counted_db[i])
         print(' '.join(db) + ' + java: ' + str(with_java[i]) + ' of ' + str(counted_db[i]) + ' (' + percent + '%)')
 
+def all_lang() :
+    lang = [['java'], ['python'], ['c'], ['kotlin'], ['swift'], ['rust'], ['ruby'], ['scala'], ['julia'], ['lua']]
+    parsed_description = parse_job_description()
+    parsed_db = parse_db()
+    all_terms = lang + parsed_db
+    query_map = pd.DataFrame(parsed_description.apply(
+        lambda s: [1 if np.all([d in s for d in db]) else 0 for db in all_terms]).values.tolist(),
+        columns=[' '.join(d) for d in all_terms])
+
+    output = query_map[query_map['java'] > 0].apply(lambda s: np.where(s == 1)[0], axis=1).apply(lambda s: list(query_map.columns[s]))
+    print(output)
 # todo
 
 # What DB should I learn after java? done :
 # I wound say I will learn db2 after finish java because of the demand in the market
 
 # Which DB is in demand alongside oracle?
+#   - put database that appear to the table and sum up
 
 # What programing language is in demand alongside python?
-
-# Create a 0-1 vector using bitwise and/or
-# Start with something like:
+#   - put the programming language that appear to the table and sum it up
