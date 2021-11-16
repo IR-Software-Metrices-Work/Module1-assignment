@@ -80,17 +80,7 @@ def along_side_with_python():
         lambda s: list(query_map.columns[s])
     ).drop_duplicates()
 
-    summary_map = pd.DataFrame(output.apply(
-        lambda s: [1 if np.all([d in s for d in db]) else 0 for db in output_no_duplicates]).values.tolist(),
-        columns=[' '.join(d) for d in output_no_duplicates]
-    )
-
-    for item in output_no_duplicates:
-        col = ''
-        for i in item:
-            col += i + ' '
-        col = re.sub(r"\s+$", "", col)
-        print(col, ":", summary_map[col].values.sum(), 'of', output.size)
+    show_data(output,output_no_duplicates)
 
 def alongside_with_oracle():
     parsed_description = parse_job_description()
@@ -114,11 +104,20 @@ def alongside_with_oracle():
         lambda s: list(query_map.columns[s])
     ).drop_duplicates()
 
-    summary_map = pd.DataFrame(output.apply(
-        lambda s: [1 if np.all([d in s for d in db]) else 0 for db in output_no_duplicates]).values.tolist(),
+    show_data(output,output_no_duplicates)
+
+
+
+def show_data(output,output_no_duplicates) :
+    summary_map = pd.DataFrame(
+        output.apply(
+            lambda s: [
+                1 if np.all([d in s for d in db])
+                else 0 for db in output_no_duplicates]
+        ).values.tolist(),
         columns=[' '.join(d) for d in output_no_duplicates]
     )
-
+    print(summary_map)
     for item in output_no_duplicates:
         col = ''
         for i in item:
